@@ -1,4 +1,3 @@
-// lib/services/weather_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
@@ -9,7 +8,6 @@ class WeatherService {
   static const String _apiKey = 'cf9efc493d8bcbd101231c722c6b97c8';
   static const String _baseUrl = 'https://api.openweathermap.org/data/2.5';
 
-  /// Busca clima atual por nome da cidade
   Future<WeatherModel> getWeatherByCity(String cityName) async {
     try {
       final response = await http.get(
@@ -20,7 +18,6 @@ class WeatherService {
       if (response.statusCode == 200) {
         final weatherData = json.decode(response.body);
 
-        // Buscar previsão de 5 dias
         final forecastData = await _getForecastByCoordinates(
           weatherData['coord']['lat'],
           weatherData['coord']['lon'],
@@ -37,7 +34,6 @@ class WeatherService {
     }
   }
 
-  /// Busca clima atual por coordenadas
   Future<WeatherModel> getWeatherByCoordinates(double lat, double lon) async {
     try {
       final response = await http.get(
@@ -48,7 +44,6 @@ class WeatherService {
       if (response.statusCode == 200) {
         final weatherData = json.decode(response.body);
 
-        // Buscar previsão de 5 dias
         final forecastData = await _getForecastByCoordinates(lat, lon);
 
         return WeatherModel.fromJson(weatherData, forecast: forecastData);
@@ -60,7 +55,6 @@ class WeatherService {
     }
   }
 
-  /// Busca previsão de 5 dias a cada 3 horas
   Future<List<Forecast>> _getForecastByCoordinates(
       double lat, double lon) async {
     try {
@@ -73,7 +67,6 @@ class WeatherService {
         final data = json.decode(response.body);
         final List<dynamic> forecastList = data['list'];
 
-        // Agrupar previsões por dia e pegar a do meio-dia
         Map<String, Forecast> dailyForecasts = {};
 
         for (var item in forecastList) {
@@ -81,7 +74,6 @@ class WeatherService {
           final dayKey =
               '${forecast.dateTime.year}-${forecast.dateTime.month}-${forecast.dateTime.day}';
 
-          // Pegar previsão mais próxima do meio-dia ou a primeira disponível
           if (!dailyForecasts.containsKey(dayKey) ||
               (forecast.dateTime.hour >= 12 && forecast.dateTime.hour < 15)) {
             dailyForecasts[dayKey] = forecast;
@@ -96,7 +88,6 @@ class WeatherService {
     }
   }
 
-  /// Obtém localização atual do dispositivo
   Future<Position?> getCurrentPosition() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -120,7 +111,6 @@ class WeatherService {
     }
   }
 
-  /// Converte coordenadas em nome da cidade
   Future<String> getCityNameFromCoordinates(double lat, double lon) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);

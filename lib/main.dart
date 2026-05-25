@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'screens/home_screen.dart';
@@ -23,7 +22,6 @@ class WeatherApp extends StatelessWidget {
           centerTitle: true,
           elevation: 0,
         ),
-        // Correção: usar CardThemeData em vez de CardTheme
         cardTheme: CardThemeData(
           elevation: 4,
           shape: RoundedRectangleBorder(
@@ -61,30 +59,24 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Verificar se a permissão foi concedida quando o app retornar
       _checkPermissionAndNavigate();
     }
   }
 
   Future<void> _requestLocationPermission() async {
-    // Solicitar permissão de localização imediatamente
     var status = await Permission.location.status;
 
     if (status.isGranted) {
-      // Permissão já concedida, navegar para HomeScreen
       _navigateToHome();
     } else if (status.isDenied || status.isRestricted) {
-      // Solicitar permissão
       status = await Permission.location.request();
 
       if (status.isGranted) {
         _navigateToHome();
       } else {
-        // Permissão negada, mostrar diálogo
         _showPermissionDeniedDialog();
       }
     } else if (status.isPermanentlyDenied) {
-      // Permissão permanentemente negada
       _showPermissionDeniedDialog();
     }
   }
@@ -146,7 +138,6 @@ class _SplashScreenState extends State<SplashScreen>
               onPressed: () {
                 Navigator.pop(context);
                 openAppSettings().then((_) {
-                  // Após abrir configurações, navegar para home
                   _navigateToHome();
                 });
               },
@@ -175,7 +166,6 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Animação de carregamento
               TweenAnimationBuilder(
                 tween: Tween<double>(begin: 0.8, end: 1.0),
                 duration: const Duration(milliseconds: 1500),

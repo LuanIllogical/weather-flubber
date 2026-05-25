@@ -1,4 +1,3 @@
-// lib/widgets/forecast_card.dart
 import 'package:flutter/material.dart';
 import '../models/weather_model.dart';
 
@@ -63,7 +62,6 @@ class ForecastCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          // Dia da semana
           Expanded(
             flex: 2,
             child: Text(
@@ -74,8 +72,6 @@ class ForecastCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Ícone do clima
           Expanded(
             flex: 1,
             child: Text(
@@ -84,8 +80,6 @@ class ForecastCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
-
-          // Temperaturas
           Expanded(
             flex: 2,
             child: Row(
@@ -125,8 +119,6 @@ class ForecastCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Descrição
           Expanded(
             flex: 2,
             child: Text(

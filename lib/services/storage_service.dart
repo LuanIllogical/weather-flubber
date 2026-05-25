@@ -1,17 +1,14 @@
-// lib/services/storage_service.dart
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
   static const String _favoritesKey = 'favorite_cities';
 
-  /// Salva cidade nos favoritos
   Future<void> saveFavoriteCity(Map<String, dynamic> cityData) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final favorites = await getFavoriteCities();
 
-      // Verificar se já existe
       bool exists = favorites.any((city) =>
           city['cityName'] == cityData['cityName'] &&
           city['country'] == cityData['country']);
@@ -19,16 +16,15 @@ class StorageService {
       if (!exists) {
         favorites.add(cityData);
         await prefs.setString(_favoritesKey, json.encode(favorites));
-        print('Cidade salva nos favoritos: ${cityData['cityName']}'); // Debug
+        print('Cidade salva nos favoritos: ${cityData['cityName']}');
       } else {
-        print('Cidade já existe nos favoritos'); // Debug
+        print('Cidade já existe nos favoritos');
       }
     } catch (e) {
-      print('Erro ao salvar favorito: $e'); // Debug
+      print('Erro ao salvar favorito: $e');
     }
   }
 
-  /// Remove cidade dos favoritos
   Future<void> removeFavoriteCity(String cityName, String country) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -38,13 +34,12 @@ class StorageService {
           (city) => city['cityName'] == cityName && city['country'] == country);
 
       await prefs.setString(_favoritesKey, json.encode(favorites));
-      print('Cidade removida dos favoritos: $cityName'); // Debug
+      print('Cidade removida dos favoritos: $cityName');
     } catch (e) {
-      print('Erro ao remover favorito: $e'); // Debug
+      print('Erro ao remover favorito: $e');
     }
   }
 
-  /// Obtém lista de cidades favoritas
   Future<List<Map<String, dynamic>>> getFavoriteCities() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -57,12 +52,11 @@ class StorageService {
 
       return [];
     } catch (e) {
-      print('Erro ao carregar favoritos: $e'); // Debug
+      print('Erro ao carregar favoritos: $e');
       return [];
     }
   }
 
-  /// Verifica se cidade está nos favoritos
   Future<bool> isCityFavorite(String cityName, String country) async {
     try {
       final favorites = await getFavoriteCities();
@@ -70,10 +64,10 @@ class StorageService {
           city['cityName']?.toString().toLowerCase() ==
               cityName.toLowerCase() &&
           city['country']?.toString().toLowerCase() == country.toLowerCase());
-      print('Verificando favorito - $cityName: $isFav'); // Debug
+      print('Verificando favorito - $cityName: $isFav');
       return isFav;
     } catch (e) {
-      print('Erro ao verificar favorito: $e'); // Debug
+      print('Erro ao verificar favorito: $e');
       return false;
     }
   }

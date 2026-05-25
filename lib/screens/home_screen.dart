@@ -1,4 +1,3 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import '../models/weather_model.dart';
 import '../services/weather_service.dart';
@@ -104,8 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _toggleFavorite() async {
     if (_weather == null) return;
 
-    print('Clicou no favorito! Cidade: ${_weather!.cityName}'); // Debug
-    print('É favorito atualmente? $_isFavorite'); // Debug
+    print('Clicou no favorito! Cidade: ${_weather!.cityName}');
+    print('É favorito atualmente? $_isFavorite');
 
     try {
       if (_isFavorite) {
@@ -113,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _weather!.cityName,
           _weather!.country,
         );
-        print('Removido com sucesso!'); // Debug
+        print('Removido com sucesso!');
       } else {
         await _storageService.saveFavoriteCity({
           'cityName': _weather!.cityName,
@@ -121,15 +120,13 @@ class _HomeScreenState extends State<HomeScreen> {
           'latitude': _weather!.latitude,
           'longitude': _weather!.longitude,
         });
-        print('Salvo com sucesso!'); // Debug
+        print('Salvo com sucesso!');
       }
 
-      // Atualiza o estado
       setState(() {
         _isFavorite = !_isFavorite;
       });
 
-      // Feedback visual
       if (mounted) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } catch (e) {
-      print('ERRO ao favoritar: $e'); // Debug
+      print('ERRO ao favoritar: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

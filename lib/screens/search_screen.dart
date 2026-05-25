@@ -1,4 +1,3 @@
-// lib/screens/search_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -22,6 +21,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isSearching = false;
   List<CitySuggestion> _suggestions = [];
   List<String> _recentSearches = [];
+  List<Map<String, dynamic>> _favoriteCities = [];
 
   Future<void>? _debounce;
 
@@ -46,6 +46,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+
+    _loadFavorites();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -58,7 +61,16 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  /// Busca sugestões de cidades usando a API de Geocoding
+  Future<void> _loadFavorites() async {
+    final favorites = await _storageService.getFavoriteCities();
+
+    if (mounted) {
+      setState(() {
+        _favoriteCities = favorites;
+      });
+    }
+  }
+
   Future<void> _searchSuggestions(String query) async {
     if (query.trim().length < 2) {
       setState(() {
@@ -68,7 +80,6 @@ class _SearchScreenState extends State<SearchScreen> {
       return;
     }
 
-    // Cancelar busca anterior
     _debounce = Future.delayed(const Duration(milliseconds: 500), () async {
       if (!mounted) return;
 
@@ -82,14 +93,13 @@ class _SearchScreenState extends State<SearchScreen> {
             _isSearching = false;
           });
 
-          // Debug
           print('Sugestões encontradas: ${suggestions.length}');
           for (var s in suggestions) {
             print('- ${s.name}, ${s.country}');
           }
         }
       } catch (e) {
-        print('Erro na busca: $e'); // Debug
+        print('Erro na busca: $e');
         if (mounted) {
           setState(() {
             _isSearching = false;
@@ -100,20 +110,18 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  /// Busca sugestões da API OpenWeatherMap Geocoding
   Future<List<CitySuggestion>> _fetchCitySuggestions(String query) async {
-    // IMPORTANTE: Substitua pela sua chave da API
     const String apiKey = 'cf9efc493d8bcbd101231c722c6b97c8';
     const String baseUrl = 'https://api.openweathermap.org/geo/1.0/direct';
 
     try {
       final uri = Uri.parse(
           '$baseUrl?q=${Uri.encodeComponent(query)}&limit=5&appid=$apiKey');
-      print('Buscando: $uri'); // Debug
+      print('Buscando: $uri');
 
       final response = await http.get(uri);
-      print('Status: ${response.statusCode}'); // Debug
-      print('Resposta: ${response.body}'); // Debug
+      print('Status: ${response.statusCode}');
+      print('Resposta: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -122,7 +130,6 @@ class _SearchScreenState extends State<SearchScreen> {
           return [];
         }
 
-        // Remover duplicatas
         final seen = <String>{};
         final uniqueCities = data.where((item) {
           final key = '${item['name']}-${item['country']}';
@@ -141,25 +148,22 @@ class _SearchScreenState extends State<SearchScreen> {
           );
         }).toList();
       } else if (response.statusCode == 401) {
-        print('ERRO: API Key inválida!'); // Debug
+        print('ERRO: API Key inválida!');
         return [];
       }
       return [];
     } catch (e) {
-      print('Erro na requisição: $e'); // Debug
+      print('Erro na requisição: $e');
       return [];
     }
   }
 
-  /// Seleciona cidade e retorna para a tela anterior
   Future<void> _selectCity(String cityName) async {
     setState(() => _isLoading = true);
 
     try {
-      // Tentar buscar o clima para validar
       await _weatherService.getWeatherByCity(cityName);
 
-      // Adicionar aos recentes
       if (!_recentSearches.contains(cityName)) {
         _recentSearches.insert(0, cityName);
         if (_recentSearches.length > 5) {
@@ -171,7 +175,7 @@ class _SearchScreenState extends State<SearchScreen> {
         Navigator.pop(context, cityName);
       }
     } catch (e) {
-      print('Erro ao buscar cidade: $e'); // Debug
+      print('Erro ao buscar cidade: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -188,7 +192,6 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  /// Busca direta (Enter)
   Future<void> _searchCity() async {
     final cityName = _searchController.text.trim();
     if (cityName.isEmpty) return;
@@ -204,7 +207,6 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: Column(
         children: [
-          // Campo de busca
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -264,8 +266,6 @@ class _SearchScreenState extends State<SearchScreen> {
               textInputAction: TextInputAction.search,
             ),
           ),
-
-          // Resultados
           Expanded(
             child: _buildResultsList(),
           ),
@@ -277,7 +277,6 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildResultsList() {
     final query = _searchController.text.trim();
 
-    // Se tem texto, mostra sugestões
     if (query.isNotEmpty) {
       if (_isSearching) {
         return const Center(
@@ -323,7 +322,6 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       }
 
-      // Lista de sugestões
       return ListView.builder(
         padding: const EdgeInsets.only(top: 8),
         itemCount: _suggestions.length + 1,
@@ -346,7 +344,6 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    // Sem texto: mostra recentes e populares
     return ListView(
       padding: const EdgeInsets.only(top: 8),
       children: [
@@ -372,25 +369,36 @@ class _SearchScreenState extends State<SearchScreen> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            'Cidades Populares',
+            _favoriteCities.isNotEmpty
+                ? 'Cidades Favoritas'
+                : 'Cidades Populares',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.orange.shade700,
+              color: _favoriteCities.isNotEmpty
+                  ? Colors.red.shade700
+                  : Colors.orange.shade700,
             ),
           ),
         ),
-        ..._popularCities.map((city) => ListTile(
-              leading: const Icon(Icons.location_city),
-              title: Text(city['name']!),
-              subtitle: Text('${city['state']}, ${city['country']}'),
-              onTap: () => _selectCity(city['name']!),
-            )),
+        if (_favoriteCities.isNotEmpty)
+          ..._favoriteCities.map((city) => ListTile(
+                leading: const Icon(Icons.favorite, color: Colors.red),
+                title: Text(city['cityName'] ?? ''),
+                subtitle: Text(city['country'] ?? ''),
+                onTap: () => _selectCity(city['cityName']),
+              ))
+        else
+          ..._popularCities.map((city) => ListTile(
+                leading: const Icon(Icons.location_city),
+                title: Text(city['name']!),
+                subtitle: Text('${city['state']}, ${city['country']}'),
+                onTap: () => _selectCity(city['name']!),
+              )),
       ],
     );
   }
 
-  // MODIFIQUE O TRAILING DO ListTile
   Widget _buildSuggestionTile(CitySuggestion city) {
     final key = '${city.name}-${city.country}';
 

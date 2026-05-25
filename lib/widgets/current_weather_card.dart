@@ -1,4 +1,3 @@
-// lib/widgets/current_weather_card.dart
 import 'package:flutter/material.dart';
 import '../models/weather_model.dart';
 
@@ -86,7 +85,6 @@ class _CurrentWeatherCardState extends State<CurrentWeatherCard> {
             ),
             const SizedBox(height: 20),
 
-            // Temperatura principal
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -118,7 +116,6 @@ class _CurrentWeatherCardState extends State<CurrentWeatherCard> {
             ),
             const SizedBox(height: 20),
 
-            // Temperaturas
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -136,7 +133,6 @@ class _CurrentWeatherCardState extends State<CurrentWeatherCard> {
             ),
             const SizedBox(height: 20),
 
-            // Dados adicionais
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
